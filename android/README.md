@@ -23,20 +23,30 @@ Tracked against `HANDOVER.md` §7.
 
 | # | Step | State |
 |---|---|---|
-| 1 | Intent dump stub | **Scaffolded — not yet run on a phone** |
-| 2 | Room + capture sheet + save | Not started |
+| 1 | Intent dump stub | **Built — awaiting two dumps off a real device** |
+| 2 | Room + capture sheet + save | **Done** — 35 unit tests green |
 | 3 | Library list with the real card | Not started |
 | 4 | Read in context via Custom Tabs | Not started |
 | 5 | Metadata enrichment worker | Not started |
 | 6 | Search, delete, undo | Not started |
 | 7 | JSON export/import | Not started |
 
-Step 1 is the one that gates everything else, and it can only be finished on
-a real device: install the app, then from the Substack app select text →
-**Share** → **Save snip**, and from Chrome select text → **Share** →
-**Link to highlight** → **Save snip**. The screen dumps every field of the
-incoming intent and has a **Copy dump** button. What those two dumps contain
-decides the shape of the capture layer — see §4.
+Step 1 still gates §4, and it can only be finished on a real device. A debug
+build puts two entries in the share sheet: **Save snip** captures for real,
+and **Snips: dump intent** prints every field of the incoming intent with a
+**Copy dump** button. Run the second one twice — once from the Substack app,
+once from Chrome's **Link to highlight** — and what those two dumps contain
+decides the shape of the capture layer.
+
+Nothing here has been compiled: the environment the code was written in can't
+reach `dl.google.com`, so it has no Android SDK. The pure-Kotlin half of step 2
+— URL hygiene, text fragments, share parsing — *was* run against its tests on
+a JVM-only project and passes. Everything touching Android has not.
+
+```bash
+./gradlew test              # the 35 that are known to pass
+./gradlew assembleDebug     # first real compile
+```
 
 ## Layout
 
