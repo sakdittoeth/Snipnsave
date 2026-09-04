@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  HANDOVER §6: Spectral for passages, at 18sp/1.6.
+
+  Google Fonts ships Spectral as static weights rather than a variable font,
+  so the three faces the design actually uses are bundled: regular for the
+  passage, italic for the reader's note, semibold for the rare heavy line.
+  Licensed under the SIL Open Font License — see res/font/OFL.txt.
+-->
+<font-family xmlns:android="http://schemas.android.com/apk/res/android">
+    <font
+        android:font="@font/spectral_regular"
+        android:fontStyle="normal"
+        android:fontWeight="400" />
+    <font
+        android:font="@font/spectral_italic"
+        android:fontStyle="italic"
+        android:fontWeight="400" />
+    <font
+        android:font="@font/spectral_semibold"
+        android:fontStyle="normal"
+        android:fontWeight="600" />
+</font-family>

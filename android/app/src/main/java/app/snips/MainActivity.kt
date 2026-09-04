@@ -1,35 +1,25 @@
 package app.snips
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.snips.capture.fallbackPublication
 import app.snips.data.Snip
 import app.snips.data.SnipDatabase
-import app.snips.ui.theme.PassageStyle
+import app.snips.ui.LibraryScreen
 import app.snips.ui.theme.SnipTheme
-import kotlinx.coroutines.flow.Flow
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -37,74 +27,37 @@ class MainActivity : ComponentActivity() {
         val snips = SnipDatabase.get(applicationContext).snips().observeAll()
 
         setContent {
+            val library by snips.collectAsStateWithLifecycle(initialValue = emptyList())
+
             SnipTheme {
                 Scaffold { insets ->
-                    Library(snips, Modifier.padding(insets))
+                    LibraryScreen(
+                        snips = library,
+                        onCopy = ::copyToClipboard,
+                        modifier = Modifier.padding(insets),
+                    )
                 }
             }
         }
     }
-}
 
-/**
- * Step 2 only proves the round trip: a snip shared from anywhere shows up
- * here, and survives a restart. The card design — passage as hero, orange
- * rule, attribution in the footer — is step 3.
- */
-@Composable
-private fun Library(snipsFlow: Flow<List<Snip>>, modifier: Modifier = Modifier) {
-    val snips by snipsFlow.collectAsStateWithLifecycle(initialValue = emptyList())
-
-    if (snips.isEmpty()) {
-        Column(
-            modifier = modifier.fillMaxSize().padding(32.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text("Snips", style = MaterialTheme.typography.titleMedium)
-            Text(
-                "Select a passage anywhere and share it here.",
-                style = MaterialTheme.typography.bodySmall,
-                color = SnipTheme.colors.muted,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 8.dp),
-            )
+    /**
+     * The prototype's copy format: the passage, then who it belongs to, then
+     * where it came from. Enough to paste into anything without stranding the
+     * quote from its source.
+     */
+    private fun copyToClipboard(snip: Snip) {
+        val attribution = snip.author.ifEmpty { snip.publication }
+        val payload = buildString {
+            append("“").append(snip.text).append("”")
+            if (attribution.isNotEmpty() || snip.url.isNotEmpty()) append("\n—")
+            if (attribution.isNotEmpty()) append(" ").append(attribution)
+            if (attribution.isNotEmpty() && snip.url.isNotEmpty()) append(",")
+            if (snip.url.isNotEmpty()) append(" ").append(snip.url)
         }
-        return
-    }
 
-    LazyColumn(modifier.fillMaxSize()) {
-        items(snips, key = { it.id }) { snip ->
-            Column(Modifier.fillMaxWidth().padding(20.dp)) {
-                Text(
-                    snip.publication.ifEmpty { fallbackPublication(snip.url) },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = SnipTheme.colors.muted,
-                )
-                Text(
-                    snip.text,
-                    style = PassageStyle,
-                    color = SnipTheme.colors.ink,
-                    modifier = Modifier.padding(top = 6.dp),
-                )
-                if (snip.note.isNotEmpty()) {
-                    Text(
-                        snip.note,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = SnipTheme.colors.muted,
-                        modifier = Modifier.padding(top = 8.dp),
-                    )
-                }
-                if (snip.url.isNotEmpty()) {
-                    Text(
-                        snip.url,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = SnipTheme.colors.muted,
-                        modifier = Modifier.padding(top = 8.dp),
-                    )
-                }
-            }
-            HorizontalDivider(color = SnipTheme.colors.hair)
-        }
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager ?: return
+        clipboard.setPrimaryClip(ClipData.newPlainText(snip.title.ifEmpty { "Snip" }, payload))
+        Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show()
     }
 }

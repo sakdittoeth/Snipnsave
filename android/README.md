@@ -24,8 +24,8 @@ Tracked against `HANDOVER.md` §7.
 | # | Step | State |
 |---|---|---|
 | 1 | Intent dump stub | **Done** — see `CAPTURE-FINDINGS.md` |
-| 2 | Room + capture sheet + save | **Done** — 45 unit tests green |
-| 3 | Library list with the real card | Not started |
+| 2 | Room + capture sheet + save | **Done** |
+| 3 | Library list with the real card | **Done** — Spectral bundled |
 | 4 | Read in context via Custom Tabs | Not started |
 | 5 | Metadata enrichment worker | Not started |
 | 6 | Search, delete, undo | Not started |
@@ -48,7 +48,7 @@ Room's annotation processor demonstrably ran — `app/schemas` holds the schema
 it generated on a real build.
 
 ```bash
-./gradlew test              # the 45 that are known to pass
+./gradlew test              # the 57 that are known to pass
 ./gradlew assembleDebug     # first real compile
 ```
 
@@ -58,7 +58,11 @@ it generated on a real build.
 app/src/main/java/app/snips/
   MainActivity.kt              Library host. Placeholder until step 3.
   capture/IntentDumpActivity.kt  Step 1. Throwaway — delete once CaptureActivity exists.
+  ui/SnipCard.kt               The card. §6's anatomy, passage as hero.
+  ui/LibraryScreen.kt          The list and its empty state.
+  ui/RelativeTime.kt           "3d ago", ported from the prototype.
   ui/theme/                    §6 design tokens: Color, Type, Theme.
+  res/font/                    Spectral, bundled (OFL licence included).
 ```
 
 ## Notes on the scaffold
@@ -70,5 +74,6 @@ app/src/main/java/app/snips/
   §6 tokens; the Material scheme is fed the same palette so dialogs and ripples
   don't drift. No dynamic colour — the app should look like Substack, not like
   the wallpaper.
-- **Spectral isn't bundled yet.** `PassageStyle` uses `FontFamily.Serif` as a
-  stand-in; the real font drops into `res/font` in step 3.
+- **Spectral is bundled** in `res/font`, as three static faces rather than the
+  variable font §6 assumed — that is how Google Fonts publishes it. The OFL
+  licence sits beside them.

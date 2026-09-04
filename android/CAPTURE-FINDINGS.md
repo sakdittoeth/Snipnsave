@@ -119,6 +119,8 @@ prototype's JUNK list and are stripped.
 
 - What Substack's **Restack quote** puts on the clipboard, if anything.
 - Whether other readers — Feedly, Pocket, Reeder — expose `PROCESS_TEXT`.
-- Whether a text fragment actually scrolls a Substack post once appended to
-  a canonical `<pub>.substack.com/p/<slug>` URL. This is step 4's first job
-  and the last unverified link in the chain.
+(Verified 2026-09-05: a text fragment on a canonical
+`<pub>.substack.com/p/<slug>` URL does scroll a Substack post to the passage
+and highlight it, in Chrome on Android. The deep-link half of the product
+works — step 4 is a matter of opening it in a Custom Tab rather than handing
+it to the Substack app, which cannot honour fragments.)
