@@ -40,7 +40,8 @@ import app.snips.ui.theme.SnipTheme
  * will actually branch on, and copies the whole thing to the clipboard so
  * a real capture on a real phone can be pasted somewhere useful.
  *
- * Delete this class once CaptureActivity exists and the filters point at it.
+ * Lives in src/debug, so it never reaches a release build. Delete it once the
+ * two real dumps — Substack app and Chrome — have settled §4.
  */
 class IntentDumpActivity : ComponentActivity() {
 
