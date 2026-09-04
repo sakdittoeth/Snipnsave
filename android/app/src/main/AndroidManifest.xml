@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Snips">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+          Step 1 of HANDOVER.md §7: every capture intent lands in the dump
+          screen so we can see exactly what Substack and Chrome send before
+          any of the capture logic is written. Replaced by CaptureActivity
+          in step 2 — the filters themselves stay as they are.
+
+          §4a (Chrome "Link to highlight") and §4c (share sheet) both arrive
+          as ACTION_SEND text/plain; they are told apart by whether the URL
+          carries a #:~:text= fragment, not by the filter.
+        -->
+        <activity
+            android:name=".capture.IntentDumpActivity"
+            android:exported="true"
+            android:label="@string/capture_label"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:launchMode="singleTask">
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <!-- §4b: puts Snips in the floating text-selection toolbar system-wide. -->
+            <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>

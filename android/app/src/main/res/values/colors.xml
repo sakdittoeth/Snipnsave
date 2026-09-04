@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mirrors app/src/main/java/app/snips/ui/theme/Color.kt (HANDOVER §6). -->
+    <color name="paper">#FFFFFF</color>
+    <color name="mark">#FF6719</color>
+</resources>

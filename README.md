@@ -9,7 +9,7 @@ Substack has no reader-side highlighting — quote-restacking publishes to Notes
 ```
 HANDOVER.md         Spec for the Android app. Start here.
 web-prototype/      Working PWA. Frozen reference — don't edit.
-android/            The native app. Doesn't exist yet.
+android/            The native app. Scaffolded; at step 1 of §7.
 ```
 
 ## For a fresh Claude Code session
