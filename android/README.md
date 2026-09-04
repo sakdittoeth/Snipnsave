@@ -62,7 +62,8 @@ app/src/main/java/app/snips/
   ui/LibraryScreen.kt          The list and its empty state.
   ui/RelativeTime.kt           "3d ago", ported from the prototype.
   ui/theme/                    §6 design tokens: Color, Type, Theme.
-  res/font/                    Spectral, bundled (OFL licence included).
+  res/font/                    Spectral, bundled as three static faces.
+  assets/licenses/             The OFL licence — res/ only accepts font files.
 ```
 
 ## Notes on the scaffold
@@ -75,5 +76,6 @@ app/src/main/java/app/snips/
   don't drift. No dynamic colour — the app should look like Substack, not like
   the wallpaper.
 - **Spectral is bundled** in `res/font`, as three static faces rather than the
-  variable font §6 assumed — that is how Google Fonts publishes it. The OFL
-  licence sits beside them.
+  variable font §6 assumed — that is how Google Fonts publishes it. Its OFL
+  licence ships at `assets/licenses/Spectral-OFL.txt`; `res/font` accepts only
+  `.xml`, `.ttf`, `.ttc` and `.otf`, and aapt2 fails the build on anything else.

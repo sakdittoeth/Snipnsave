@@ -5,7 +5,9 @@
   Google Fonts ships Spectral as static weights rather than a variable font,
   so the three faces the design actually uses are bundled: regular for the
   passage, italic for the reader's note, semibold for the rare heavy line.
-  Licensed under the SIL Open Font License — see res/font/OFL.txt.
+  Licensed under the SIL Open Font License; the licence ships in the APK
+  at assets/licenses/Spectral-OFL.txt. Only .xml/.ttf/.ttc/.otf may live in
+  res/font — aapt2 rejects anything else outright.
 -->
 <font-family xmlns:android="http://schemas.android.com/apk/res/android">
     <font
