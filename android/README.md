@@ -41,11 +41,11 @@ The dump screen stays in `src/debug` for now (share sheet entry: **Snips:
 dump intent**) since the open questions at the end of that file still need
 answering on a device.
 
-Room and KSP compile (the generated schema is committed); the rest of the Android
-layer has not been through a compiler here, because the environment the code was written in can't
-reach `dl.google.com`, so it has no Android SDK. The pure-Kotlin half of step 2
-— URL hygiene, text fragments, share parsing — *was* run against its tests on
-a JVM-only project and passes. Everything touching Android has not.
+The environment this code was written in can't reach `dl.google.com`, so it has
+no Android SDK and most of it has never met a compiler. Two parts have: the
+pure-Kotlin capture logic runs against its tests on a JVM-only project, and
+Room's annotation processor demonstrably ran — `app/schemas` holds the schema
+it generated on a real build.
 
 ```bash
 ./gradlew test              # the 45 that are known to pass
