@@ -23,7 +23,7 @@ Tracked against `HANDOVER.md` §7.
 
 | # | Step | State |
 |---|---|---|
-| 1 | Intent dump stub | **Built — awaiting two dumps off a real device** |
+| 1 | Intent dump stub | **Done** — see `CAPTURE-FINDINGS.md` |
 | 2 | Room + capture sheet + save | **Done** — 35 unit tests green |
 | 3 | Library list with the real card | Not started |
 | 4 | Read in context via Custom Tabs | Not started |
@@ -31,12 +31,15 @@ Tracked against `HANDOVER.md` §7.
 | 6 | Search, delete, undo | Not started |
 | 7 | JSON export/import | Not started |
 
-Step 1 still gates §4, and it can only be finished on a real device. A debug
-build puts two entries in the share sheet: **Save snip** captures for real,
-and **Snips: dump intent** prints every field of the incoming intent with a
-**Copy dump** button. Run the second one twice — once from the Substack app,
-once from Chrome's **Link to highlight** — and what those two dumps contain
-decides the shape of the capture layer.
+Step 1 is done, and it changed the design. `CAPTURE-FINDINGS.md` records what
+the intents actually contain — read it before touching capture, because it
+contradicts §4 on two points that matter and documents a product problem that
+no code fixes. In short: Chrome sends the whole passage rather than just the
+fragment, and the Substack app suppresses `PROCESS_TEXT` entirely.
+
+The dump screen stays in `src/debug` for now (share sheet entry: **Snips:
+dump intent**) since the open questions at the end of that file still need
+answering on a device.
 
 Nothing here has been compiled: the environment the code was written in can't
 reach `dl.google.com`, so it has no Android SDK. The pure-Kotlin half of step 2

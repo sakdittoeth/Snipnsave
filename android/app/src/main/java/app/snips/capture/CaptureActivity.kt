@@ -46,10 +46,11 @@ class CaptureActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 viewModel.load(
                     sharedText = sharedText,
-                    // Only read when the share brought no link. Reading someone's
-                    // clipboard unprompted shows a system toast on Android 12+,
-                    // and there's no reason to trigger it when we already have one.
-                    clipboardText = if (findUrl(sharedText) == null) readClipboard() else null,
+                    // Reading the clipboard raises a system toast on Android 12+,
+                    // so it is only consulted when it could actually supply the
+                    // missing half — a share with no link, or the Substack app's
+                    // bare post link with the passage sitting on the clipboard.
+                    clipboardText = if (shareNeedsClipboard(sharedText)) readClipboard() else null,
                 )
             }
 

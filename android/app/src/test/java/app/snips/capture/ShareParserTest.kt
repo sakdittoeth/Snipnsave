@@ -73,6 +73,55 @@ class ShareParserTest {
         assertEquals(true, draft.fragmentTruncated)
     }
 
+    // ---- the Substack app: Copy the passage, then share the post ----
+    //
+    // Its reading view offers Copy / Restack quote / Cancel and no overflow,
+    // so PROCESS_TEXT never reaches it and a shared post carries no passage.
+
+    @Test
+    fun `a bare post link pairs up with the passage on the clipboard`() {
+        val draft = parseShare(
+            sharedText = "https://pub.substack.com/p/the-post",
+            clipboardText = "The passage the reader copied before sharing the post.",
+        )
+        assertEquals("The passage the reader copied before sharing the post.", draft.text)
+        assertEquals("https://pub.substack.com/p/the-post", draft.url)
+        assertEquals(TextSource.CLIPBOARD, draft.textSource)
+        assertEquals(UrlSource.SHARED, draft.urlSource)
+    }
+
+    @Test
+    fun `a share that already carries its passage ignores the clipboard`() {
+        val draft = parseShare(
+            sharedText = "\"The real passage\" https://pub.substack.com/p/the-post",
+            clipboardText = "something else entirely",
+        )
+        assertEquals("The real passage", draft.text)
+        assertEquals(TextSource.SHARED, draft.textSource)
+    }
+
+    @Test
+    fun `a clipboard holding a link is not used as a passage`() {
+        val draft = parseShare(
+            sharedText = "https://pub.substack.com/p/the-post",
+            clipboardText = "https://example.com/something",
+        )
+        assertEquals("", draft.text)
+        assertEquals(TextSource.NONE, draft.textSource)
+    }
+
+    @Test
+    fun `the clipboard is only consulted when it could add something`() {
+        // Bare link — the passage must be on the clipboard.
+        assertEquals(true, shareNeedsClipboard("https://pub.substack.com/p/the-post"))
+        // Nothing at all.
+        assertEquals(true, shareNeedsClipboard(null))
+        // Chrome highlight: both halves already present, so no toast is earned.
+        assertEquals(false, shareNeedsClipboard(chromeHighlightShare))
+        // Passage with no link: the clipboard cannot supply what we have.
+        assertEquals(false, shareNeedsClipboard("A passage with no link"))
+    }
+
     @Test
     fun `substack share bundles the link inside the text`() {
         val draft = parseShare("\"A passage worth keeping\" https://pub.substack.com/p/the-post?utm_source=share")

@@ -61,6 +61,10 @@ fun CaptureSheet(
                 modifier = Modifier.fillMaxWidth(),
             )
 
+            if (draft.textSource == TextSource.CLIPBOARD) {
+                Hint("Passage taken from your clipboard — check it's the one you meant to keep.")
+            }
+
             if (draft.fragmentTruncated) {
                 Hint(
                     "Only the start and end of this passage came through the link. " +
