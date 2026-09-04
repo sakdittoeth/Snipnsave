@@ -19,17 +19,17 @@
         </activity>
 
         <!--
-          Step 1 of HANDOVER.md §7: every capture intent lands in the dump
-          screen so we can see exactly what Substack and Chrome send before
-          any of the capture logic is written. Replaced by CaptureActivity
-          in step 2 — the filters themselves stay as they are.
+          The one sheet all three §4 entry points converge on.
 
           §4a (Chrome "Link to highlight") and §4c (share sheet) both arrive
           as ACTION_SEND text/plain; they are told apart by whether the URL
           carries a #:~:text= fragment, not by the filter.
+
+          The step 1 intent dump is still registered against these same
+          actions in src/debug — see that manifest.
         -->
         <activity
-            android:name=".capture.IntentDumpActivity"
+            android:name=".capture.CaptureActivity"
             android:exported="true"
             android:label="@string/capture_label"
             android:excludeFromRecents="true"

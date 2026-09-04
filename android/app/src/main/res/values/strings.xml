@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">Snips</string>
     <string name="capture_label">Save snip</string>
+    <string name="snip_saved">Snip saved</string>
 </resources>
