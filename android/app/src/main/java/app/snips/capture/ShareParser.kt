@@ -1,5 +1,8 @@
 package app.snips.capture
 
+import java.net.URI
+import java.net.URISyntaxException
+
 /**
  * Turns whatever a share intent carried into a draft snip.
  *
@@ -44,13 +47,24 @@ fun parseShare(
     val sharedUrl = findUrl(shared)?.let(::trimUrlPunctuation)
     val fragment = parseTextFragment(sharedUrl)
 
-    val quote = when {
-        // §4a: the passage is already inside the link, and it's the passage the
-        // browser verified it can scroll to. Prefer it over anything else in the
-        // share — Chrome puts the page title there, not the selection.
-        fragment != null -> fragment.quote
-        else -> stripQuotes(shared.replace(sharedUrl.orEmpty(), "").trim())
+    // What's left of the share once the URL is lifted out of it.
+    val remainder = if (sharedUrl != null) {
+        stripQuotes(shared.replace(sharedUrl, "").trim())
+    } else {
+        stripQuotes(shared)
     }
+
+    // §4a assumed the fragment was the best source for the quote. A real
+    // Chrome "Link to highlight" share says otherwise: EXTRA_TEXT carries the
+    // *whole* selected passage, while the fragment holds only the first and
+    // last few words of it. The page title Chrome sends goes in EXTRA_SUBJECT
+    // and EXTRA_TITLE, not here, so the remainder is the passage — and taking
+    // the fragment instead would throw away the middle of what was selected.
+    val quote = if (remainder.isNotEmpty()) remainder else fragment?.quote.orEmpty()
+
+    // Only a quote we actually recovered from a start,end fragment is missing
+    // its middle. When the full passage came through the text, it isn't.
+    val truncated = fragment?.truncated == true && remainder.isEmpty()
 
     // §4b recovery 2. Only ever a URL: pasting arbitrary clipboard contents
     // into someone's snip would be worse than leaving the field empty.
@@ -69,8 +83,29 @@ fun parseShare(
             clipboardUrl != null -> UrlSource.CLIPBOARD
             else -> UrlSource.NONE
         },
-        fragmentTruncated = fragment?.truncated == true,
+        fragmentTruncated = truncated,
     )
+}
+
+/**
+ * True when a URL points at a site's front door rather than at something to
+ * read — `https://substack.com/`, `https://pub.substack.com/`.
+ *
+ * This matters more than it looks. Reading inside substack.com's own feed and
+ * sharing from there produces a highlight link to the feed root, so "read in
+ * context" has nothing to return to: the passage isn't at that address, and
+ * won't be there tomorrow either. The sheet warns rather than refuses — the
+ * snip is still worth keeping — but it's the difference between the app's two
+ * promises and only one of them.
+ */
+fun isBareSiteUrl(url: String): Boolean {
+    if (url.isBlank()) return false
+    val path = try {
+        URI(url).path
+    } catch (_: URISyntaxException) {
+        return false
+    }
+    return path.isNullOrEmpty() || path == "/"
 }
 
 /** Substack's share wraps the passage in quotes; they aren't part of it. */

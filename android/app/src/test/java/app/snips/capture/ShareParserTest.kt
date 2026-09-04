@@ -1,32 +1,76 @@
 package app.snips.capture
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ShareParserTest {
 
+    // Verbatim from a real Chrome "Link to highlight" share, captured with the
+    // step 1 intent dump on a phone. Everything about how capture behaves is
+    // pinned to this rather than to what §4 predicted.
+    private val chromeHighlightShare =
+        "\"President Biden will be at Ground Zero in NYC on the 25th anniversary of 9/11 " +
+            "with every other living President.\n\nYou know who isn\u2019t going? Donald Trump\u2026 " +
+            "because he wasn\u2019t allowed to give a speech. Pathetic.\"\n " +
+            "https://substack.com/#:~:text=President%20Biden%20will,a%20speech.%20Pathetic."
+
     @Test
-    fun `chrome highlight link gives us the quote and the article`() {
+    fun `chrome sends the whole passage in the text, not just the fragment`() {
+        val draft = parseShare(chromeHighlightShare)
+
+        // The fragment holds only "President Biden will" and "a speech. Pathetic."
+        // Taking it would silently drop everything in between.
+        assertTrue(draft.text, draft.text.startsWith("President Biden will be at Ground Zero"))
+        assertTrue(draft.text, draft.text.endsWith("give a speech. Pathetic."))
+        assertTrue(draft.text, draft.text.contains("Donald Trump"))
+        assertEquals(false, draft.text.contains(ELLIPSIS))
+    }
+
+    @Test
+    fun `a passage that arrived whole is not marked truncated`() {
+        // The link's fragment is a start,end pair, but the text was complete —
+        // so the quote can be re-linked from scratch.
+        assertEquals(false, parseShare(chromeHighlightShare).fragmentTruncated)
+    }
+
+    @Test
+    fun `the surrounding quotes chrome adds come off`() {
+        val draft = parseShare(chromeHighlightShare)
+        assertEquals(false, draft.text.startsWith("\""))
+        assertEquals(false, draft.text.endsWith("\""))
+    }
+
+    @Test
+    fun `the fragment is stripped from the stored url`() {
+        assertEquals("https://substack.com/", parseShare(chromeHighlightShare).url)
+        assertEquals(UrlSource.SHARED, parseShare(chromeHighlightShare).urlSource)
+    }
+
+    @Test
+    fun `reading in the substack feed yields a link that goes nowhere useful`() {
+        // The real capture above came from substack.com's feed, so the highlight
+        // link points at the feed root. Worth warning about in the sheet.
+        assertEquals(true, isBareSiteUrl(parseShare(chromeHighlightShare).url))
+    }
+
+    @Test
+    fun `a real post url is not flagged`() {
+        assertEquals(false, isBareSiteUrl("https://pub.substack.com/p/the-post"))
+    }
+
+    @Test
+    fun `a link-only share still falls back to the fragment for its quote`() {
         val draft = parseShare("https://pub.substack.com/p/the-post#:~:text=the%20selected%20passage")
         assertEquals("the selected passage", draft.text)
         assertEquals("https://pub.substack.com/p/the-post", draft.url)
-        assertEquals(UrlSource.SHARED, draft.urlSource)
-        assertEquals(false, draft.fragmentTruncated)
     }
 
     @Test
-    fun `a start,end highlight link is marked truncated`() {
+    fun `a link-only start,end share is marked truncated`() {
         val draft = parseShare("https://pub.substack.com/p/the-post#:~:text=first%20six,last%20six")
         assertEquals("first six${ELLIPSIS}last six", draft.text)
         assertEquals(true, draft.fragmentTruncated)
-    }
-
-    @Test
-    fun `a page title riding along with a highlight link is not mistaken for the quote`() {
-        val draft = parseShare(
-            sharedText = "The Post Everyone Is Talking About\nhttps://pub.substack.com/p/the-post#:~:text=the%20real%20passage",
-        )
-        assertEquals("the real passage", draft.text)
     }
 
     @Test

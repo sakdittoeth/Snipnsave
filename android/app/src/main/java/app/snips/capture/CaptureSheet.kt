@@ -79,6 +79,15 @@ fun CaptureSheet(
                 modifier = Modifier.fillMaxWidth(),
             )
 
+            if (isBareSiteUrl(draft.url)) {
+                Hint(
+                    "This link points at the site's front page, not at a post — most likely " +
+                        "the passage was shared from a feed. It'll save fine, but “Read in " +
+                        "context” won't find its way back. Open the post on its own page and " +
+                        "share from there to fix that.",
+                )
+            }
+
             when (draft.urlSource) {
                 UrlSource.CLIPBOARD ->
                     Hint("Taken from your clipboard — check it's the right article.")

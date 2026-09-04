@@ -72,6 +72,12 @@ class UrlHygieneTest {
     }
 
     @Test
+    fun `a full stop that belongs to a text fragment is left alone`() {
+        val url = "https://substack.com/#:~:text=President%20Biden%20will,a%20speech.%20Pathetic."
+        assertEquals(url, trimUrlPunctuation(url))
+    }
+
+    @Test
     fun `trims punctuation a url picked up from prose`() {
         assertEquals(
             "https://pub.substack.com/p/x",

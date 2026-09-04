@@ -98,5 +98,13 @@ private val URL_IN_TEXT = Regex("""https?://\S+""")
 
 fun findUrl(text: String?): String? = text?.let { URL_IN_TEXT.find(it)?.value }
 
-/** Trailing punctuation a URL picks up when it's pasted mid-sentence. */
-fun trimUrlPunctuation(url: String): String = url.trimEnd('.', ',', ')', ']', '"', '\'', '»', '”')
+/**
+ * Trailing punctuation a URL picks up when it's pasted mid-sentence.
+ *
+ * A text fragment is exempt. Chrome ends one at whatever the passage ends at,
+ * and a passage very often ends in a full stop — a real capture produced
+ * `…%20Pathetic.`, where trimming that period silently breaks both the link
+ * and the parse of the text around it.
+ */
+fun trimUrlPunctuation(url: String): String =
+    if (url.contains(FRAGMENT_MARKER)) url else url.trimEnd('.', ',', ')', ']', '"', '\'', '»', '”')
