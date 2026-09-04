@@ -56,8 +56,9 @@ it generated on a real build.
 
 ```
 app/src/main/java/app/snips/
-  MainActivity.kt              Library host. Placeholder until step 3.
-  capture/IntentDumpActivity.kt  Step 1. Throwaway — delete once CaptureActivity exists.
+  MainActivity.kt              Library host, and the copy action.
+  capture/                     The sheet, the parser, URL and fragment logic.
+  (src/debug) IntentDumpActivity.kt  Step 1's dump. Test builds only.
   ui/SnipCard.kt               The card. §6's anatomy, passage as hero.
   ui/LibraryScreen.kt          The list and its empty state.
   ui/RelativeTime.kt           "3d ago", ported from the prototype.
