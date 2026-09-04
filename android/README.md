@@ -24,7 +24,7 @@ Tracked against `HANDOVER.md` §7.
 | # | Step | State |
 |---|---|---|
 | 1 | Intent dump stub | **Done** — see `CAPTURE-FINDINGS.md` |
-| 2 | Room + capture sheet + save | **Done** — 35 unit tests green |
+| 2 | Room + capture sheet + save | **Done** — 45 unit tests green |
 | 3 | Library list with the real card | Not started |
 | 4 | Read in context via Custom Tabs | Not started |
 | 5 | Metadata enrichment worker | Not started |
@@ -41,13 +41,14 @@ The dump screen stays in `src/debug` for now (share sheet entry: **Snips:
 dump intent**) since the open questions at the end of that file still need
 answering on a device.
 
-Nothing here has been compiled: the environment the code was written in can't
+Room and KSP compile (the generated schema is committed); the rest of the Android
+layer has not been through a compiler here, because the environment the code was written in can't
 reach `dl.google.com`, so it has no Android SDK. The pure-Kotlin half of step 2
 — URL hygiene, text fragments, share parsing — *was* run against its tests on
 a JVM-only project and passes. Everything touching Android has not.
 
 ```bash
-./gradlew test              # the 35 that are known to pass
+./gradlew test              # the 45 that are known to pass
 ./gradlew assembleDebug     # first real compile
 ```
 
