@@ -22,6 +22,7 @@ import app.snips.ui.theme.SnipTheme
 @Composable
 fun LibraryScreen(
     snips: List<Snip>,
+    onRead: (Snip) -> Unit,
     onCopy: (Snip) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -32,7 +33,7 @@ fun LibraryScreen(
 
     LazyColumn(modifier.fillMaxSize()) {
         items(snips, key = { it.id }) { snip ->
-            SnipCard(snip = snip, onCopy = { onCopy(snip) })
+            SnipCard(snip = snip, onRead = { onRead(snip) }, onCopy = { onCopy(snip) })
             // Hairlines, not elevation — §6.
             HorizontalDivider(color = SnipTheme.colors.hair)
         }
@@ -93,6 +94,7 @@ private fun LibraryPreview() {
                     savedAt = now - 86_400_000L * 12,
                 ),
             ),
+            onRead = {},
             onCopy = {},
         )
     }

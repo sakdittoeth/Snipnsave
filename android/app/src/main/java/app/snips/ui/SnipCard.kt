@@ -46,6 +46,7 @@ import app.snips.ui.theme.SnipTheme
 @Composable
 fun SnipCard(
     snip: Snip,
+    onRead: () -> Unit,
     onCopy: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -71,6 +72,10 @@ fun SnipCard(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),
             )
+            // Pushes the timestamp to the right edge. Without it the two read
+            // as one phrase — "Savageminds Today" — rather than as a
+            // publication on one side and when you saved it on the other.
+            Spacer(Modifier.weight(1f))
             Spacer(Modifier.width(8.dp))
             Text(
                 text = relativeTime(snip.savedAt),
@@ -141,8 +146,19 @@ fun SnipCard(
         Spacer(Modifier.height(6.dp))
 
         // ---- actions ----
-        // "Read in context" arrives with Custom Tabs in step 4, delete in step 6.
+        // Delete arrives in step 6. "Read in context" is offered only when
+        // there is a link to follow — a snip saved without one is still worth
+        // keeping, but the action would do nothing.
         Row {
+            if (snip.url.isNotEmpty()) {
+                TextButton(onClick = onRead, contentPadding = ActionPadding) {
+                    Text(
+                        "Read in context",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.mark,
+                    )
+                }
+            }
             TextButton(onClick = onCopy, contentPadding = ActionPadding) {
                 Text("Copy", style = MaterialTheme.typography.labelLarge, color = colors.muted)
             }
@@ -167,6 +183,7 @@ private fun SnipCardPreview() {
                 title = "Technofeudalism and the Future of Capitalism",
                 savedAt = System.currentTimeMillis() - 86_400_000L * 3,
             ),
+            onRead = {},
             onCopy = {},
         )
     }

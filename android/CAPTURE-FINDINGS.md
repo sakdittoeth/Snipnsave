@@ -142,5 +142,6 @@ and the failure mode was invisible until the interstitial was tried directly.
 - What Substack's **Restack quote** puts on the clipboard, if anything.
 - Whether other readers — Feedly, Pocket, Reeder — expose `PROCESS_TEXT`.
 - Whether a Custom Tab honours text fragments as reliably as Chrome proper
-  does. Step 4's first job, and the reason it opens in a Custom Tab rather
-  than a plain view intent, which may hand the link to the Substack app.
+  does. Step 4 is built and pins the intent to a Custom Tabs browser — with
+  the `<queries>` block Android 11+ needs for that pinning to resolve at all —
+  but the behaviour itself is still unmeasured.

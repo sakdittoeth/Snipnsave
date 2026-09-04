@@ -26,7 +26,7 @@ Tracked against `HANDOVER.md` §7.
 | 1 | Intent dump stub | **Done** — see `CAPTURE-FINDINGS.md` |
 | 2 | Room + capture sheet + save | **Done** |
 | 3 | Library list with the real card | **Done** — Spectral bundled |
-| 4 | Read in context via Custom Tabs | Not started |
+| 4 | Read in context via Custom Tabs | **Done** — untested on device |
 | 5 | Metadata enrichment worker | Not started |
 | 6 | Search, delete, undo | Not started |
 | 7 | JSON export/import | Not started |
@@ -62,6 +62,7 @@ app/src/main/java/app/snips/
   ui/SnipCard.kt               The card. §6's anatomy, passage as hero.
   ui/LibraryScreen.kt          The list and its empty state.
   ui/RelativeTime.kt           "3d ago", ported from the prototype.
+  ui/ReadInContext.kt          Opens the deep link in a Custom Tab.
   ui/theme/                    §6 design tokens: Color, Type, Theme.
   res/font/                    Spectral, bundled as three static faces.
   assets/licenses/             The OFL licence — res/ only accepts font files.
