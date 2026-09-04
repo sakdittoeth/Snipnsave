@@ -73,6 +73,61 @@ class ShareParserTest {
         assertEquals(true, draft.fragmentTruncated)
     }
 
+    // Verbatim from a real Substack-app post share, same device.
+    private val substackAppShare =
+        "https://open.substack.com/pub/savageminds/p/technofeudalism-and-the-future-of" +
+            "?utm_source=share&utm_medium=android&r=2jycuw"
+
+    @Test
+    fun `the substack app shares a real post link`() {
+        val draft = parseShare(substackAppShare, sharedTitle = "Technofeudalism and the Future of Capitalism")
+        assertEquals(false, isBareSiteUrl(draft.url))
+        assertEquals(UrlSource.SHARED, draft.urlSource)
+    }
+
+    @Test
+    fun `the open substack interstitial is rewritten to the publication's own address`() {
+        // open.substack.com only redirects. Keeping it would read the
+        // publication as "Open", point §5's by-slug lookup at the wrong
+        // origin, and make a text fragment survive a redirect to land.
+        assertEquals(
+            "https://savageminds.substack.com/p/technofeudalism-and-the-future-of",
+            parseShare(substackAppShare).url,
+        )
+    }
+
+    @Test
+    fun `the share's tracking params do not survive`() {
+        val url = parseShare(substackAppShare).url
+        assertEquals(false, url.contains("utm_"))
+        assertEquals(false, url.contains("r=2jycuw"))
+    }
+
+    @Test
+    fun `the substack app's title is kept`() {
+        val draft = parseShare(substackAppShare, sharedTitle = "Technofeudalism and the Future of Capitalism")
+        assertEquals("Technofeudalism and the Future of Capitalism", draft.title)
+    }
+
+    @Test
+    fun `chrome's share label is not mistaken for a title`() {
+        val draft = parseShare(chromeHighlightShare, sharedTitle = "Including link: https://substack.com/")
+        assertEquals("", draft.title)
+    }
+
+    @Test
+    fun `a substack app share with the passage on the clipboard is a complete snip`() {
+        val draft = parseShare(
+            sharedText = substackAppShare,
+            sharedTitle = "Technofeudalism and the Future of Capitalism",
+            clipboardText = "Rentiers extract; capitalists invest. That distinction is the whole argument.",
+        )
+        assertEquals("Rentiers extract; capitalists invest. That distinction is the whole argument.", draft.text)
+        assertEquals("https://savageminds.substack.com/p/technofeudalism-and-the-future-of", draft.url)
+        assertEquals("Technofeudalism and the Future of Capitalism", draft.title)
+        assertEquals(TextSource.CLIPBOARD, draft.textSource)
+    }
+
     // ---- the Substack app: Copy the passage, then share the post ----
     //
     // Its reading view offers Copy / Restack quote / Cancel and no overflow,

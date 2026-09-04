@@ -43,7 +43,7 @@ fun cleanUrl(raw: String?): String {
     val withoutFragment = trimmed.substringBefore("#")
 
     return try {
-        val uri = URI(withoutFragment)
+        val uri = URI(canonicalise(withoutFragment))
         if (uri.scheme == null || uri.host == null) return withoutFragment
 
         val query = uri.rawQuery
@@ -63,6 +63,29 @@ fun cleanUrl(raw: String?): String {
         withoutFragment
     }
 }
+
+/**
+ * Rewrite Substack's share link to the post's own address.
+ *
+ * The Substack app shares posts as
+ * `open.substack.com/pub/<publication>/p/<slug>`, an interstitial that
+ * redirects to the publication. Three things go wrong if we keep it:
+ * the publication reads as "Open", §5's `by-slug` endpoint is hosted on the
+ * publication's origin rather than this one, and a text fragment has to
+ * survive a redirect to land.
+ *
+ * `<publication>.substack.com/p/<slug>` is the canonical form and works for
+ * custom domains too — Substack redirects it to them. Anything that doesn't
+ * match the shape is returned untouched.
+ */
+private fun canonicalise(url: String): String {
+    val match = OPEN_SUBSTACK.find(url) ?: return url
+    val (publication, rest) = match.destructured
+    return "https://$publication.substack.com/p/$rest"
+}
+
+private val OPEN_SUBSTACK =
+    Regex("""^https?://open\.substack\.com/pub/([^/?#]+)/p/(.+)$""", RegexOption.IGNORE_CASE)
 
 /**
  * The publication name to show until the metadata worker fills in the real

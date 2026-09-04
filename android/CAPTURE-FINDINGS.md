@@ -79,12 +79,46 @@ half the product is better than none.
 **The habit that avoids it:** open the post on its own page, so the address
 bar reads `something.substack.com/p/some-slug`, and share from there.
 
+## The Substack app's post share — usable, after rewriting
+
+```
+action = android.intent.action.SEND
+type   = text/plain
+
+EXTRA_TEXT   https://open.substack.com/pub/savageminds/p/technofeudalism-and-the-future-of
+             ?utm_source=share&utm_medium=android&r=2jycuw
+EXTRA_TITLE  "Technofeudalism and the Future of Capitalism"
+sourcePackageName  "com.substack.app"
+```
+
+Good news: it is a real post link, so **Copy the passage → share the post →
+Save snip** produces a complete snip with a working deep link. That is the
+Substack app's supported route.
+
+Two things had to change for it.
+
+**`open.substack.com` is an interstitial, not the post.** It redirects to the
+publication. Left alone it breaks three things at once: `fallbackPublication`
+reads the publication as "Open"; §5's `by-slug` endpoint lives on the
+publication's origin, not this one; and a text fragment would have to survive
+a redirect to land. `cleanUrl` now rewrites
+`open.substack.com/pub/<pub>/p/<slug>` to `<pub>.substack.com/p/<slug>`, which
+is canonical and works for custom domains too. Anything not matching that
+shape is untouched.
+
+**`EXTRA_TITLE` here is the real post title** — unlike Chrome, which puts its
+own "Including link: <url>" label in both title extras. So the title is worth
+keeping, and is: it goes into `Snip.title` at capture, and the card can show a
+real title before enrichment ever runs. Any title containing a URL is
+discarded, which is what separates the two cases.
+
+The share's `utm_source`, `utm_medium` and `r` params were already on the
+prototype's JUNK list and are stripped.
+
 ## Still unknown
 
-- Whether the Substack app's **post-level** share (the ⋯ menu on a post,
-  rather than on selected text) hands over a proper `/p/` URL. If it does,
-  the Copy-then-share flow above is sound. If it hands over a
-  `substack.com/…` redirect, capture from that app is limited to passages
-  with no usable link.
 - What Substack's **Restack quote** puts on the clipboard, if anything.
 - Whether other readers — Feedly, Pocket, Reeder — expose `PROCESS_TEXT`.
+- Whether a text fragment actually scrolls a Substack post once appended to
+  a canonical `<pub>.substack.com/p/<slug>` URL. This is step 4's first job
+  and the last unverified link in the chain.

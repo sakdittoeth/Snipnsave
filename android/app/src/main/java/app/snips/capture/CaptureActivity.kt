@@ -40,12 +40,19 @@ class CaptureActivity : ComponentActivity() {
         val sharedText = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
             ?: intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
 
+        // The Substack app sends the real post title in EXTRA_TITLE and no
+        // EXTRA_SUBJECT; Chrome sends its own share label in both. parseShare
+        // decides which of those is worth keeping.
+        val sharedTitle = intent.getStringExtra(Intent.EXTRA_TITLE)
+            ?: intent.getStringExtra(Intent.EXTRA_SUBJECT)
+
         setContent {
             val scope = rememberCoroutineScope()
 
             LaunchedEffect(Unit) {
                 viewModel.load(
                     sharedText = sharedText,
+                    sharedTitle = sharedTitle,
                     // Reading the clipboard raises a system toast on Android 12+,
                     // so it is only consulted when it could actually supply the
                     // missing half — a share with no link, or the Substack app's

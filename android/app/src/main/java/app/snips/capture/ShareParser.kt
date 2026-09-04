@@ -44,6 +44,8 @@ enum class TextSource {
 data class CaptureDraft(
     val text: String = "",
     val url: String = "",
+    /** The post title, when the sharing app sent a usable one. */
+    val title: String = "",
     val urlSource: UrlSource = UrlSource.NONE,
     val textSource: TextSource = TextSource.NONE,
     val fragmentTruncated: Boolean = false,
@@ -67,14 +69,16 @@ fun shareNeedsClipboard(sharedText: String?): Boolean {
 
 /**
  * @param sharedText EXTRA_TEXT, or EXTRA_PROCESS_TEXT for §4b.
+ * @param sharedTitle EXTRA_TITLE, falling back to EXTRA_SUBJECT.
  * @param clipboardText checked only when the share carried no URL of its own.
  *
- * EXTRA_SUBJECT is deliberately not an input: it carries the post's title,
- * and a title is not a passage. It becomes the title fallback in step 5,
- * where metadata is the subject.
+ * Neither title extra is ever treated as the passage. Chrome puts its own
+ * share label there — "Including link: <url>" — and even a real title is not
+ * something the reader chose to keep.
  */
 fun parseShare(
     sharedText: String?,
+    sharedTitle: String? = null,
     clipboardText: String? = null,
 ): CaptureDraft {
     val shared = sharedText.orEmpty().trim()
@@ -125,6 +129,7 @@ fun parseShare(
     return CaptureDraft(
         text = quote,
         url = cleanUrl(url),
+        title = plausibleTitle(sharedTitle),
         urlSource = when {
             sharedUrl != null -> UrlSource.SHARED
             clipboardUrl != null -> UrlSource.CLIPBOARD
@@ -137,6 +142,19 @@ fun parseShare(
         },
         fragmentTruncated = truncated,
     )
+}
+
+/**
+ * A title extra worth keeping, or "".
+ *
+ * The Substack app sends the real post title. Chrome sends its own share
+ * label, which is the string "Including link:" followed by the URL — so
+ * anything carrying a URL is discarded rather than saved as a title.
+ */
+internal fun plausibleTitle(title: String?): String {
+    val trimmed = title?.trim().orEmpty()
+    if (trimmed.isEmpty() || findUrl(trimmed) != null) return ""
+    return trimmed
 }
 
 /**

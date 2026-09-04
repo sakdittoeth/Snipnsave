@@ -92,6 +92,10 @@ fun CaptureSheet(
                 )
             }
 
+            if (draft.title.isNotEmpty()) {
+                Hint("From “${draft.title}”")
+            }
+
             when (draft.urlSource) {
                 UrlSource.CLIPBOARD ->
                     Hint("Taken from your clipboard — check it's the right article.")

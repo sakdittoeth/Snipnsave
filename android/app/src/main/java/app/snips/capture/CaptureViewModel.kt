@@ -29,11 +29,11 @@ class CaptureViewModel(private val dao: SnipDao) : ViewModel() {
      * @param clipboardText read by the Activity, since only it can reach the
      *   clipboard service — and only when the share carried no link of its own.
      */
-    suspend fun load(sharedText: String?, clipboardText: String?) {
+    suspend fun load(sharedText: String?, sharedTitle: String?, clipboardText: String?) {
         if (loaded) return
         loaded = true
 
-        var parsed = parseShare(sharedText, clipboardText)
+        var parsed = parseShare(sharedText, sharedTitle, clipboardText)
 
         // §4b recovery 3: a passage with no link, moments after saving one from
         // an article, is very likely from that same article. Offered, not
@@ -76,6 +76,7 @@ class CaptureViewModel(private val dao: SnipDao) : ViewModel() {
                 text = draft.text.trim(),
                 url = url,
                 note = note.trim(),
+                title = draft.title,
                 publication = if (url.isEmpty()) "" else fallbackPublication(url),
                 savedAt = System.currentTimeMillis(),
                 enriched = false,
