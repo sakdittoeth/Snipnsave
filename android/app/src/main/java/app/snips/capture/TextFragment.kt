@@ -66,29 +66,36 @@ fun parseTextFragment(url: String?): ParsedFragment? {
  */
 fun deepLink(url: String, text: String, fragmentTruncated: Boolean = false): String? {
     if (url.isBlank()) return null
+
+    // Canonicalise again here, not only at capture. A fragment is dropped
+    // across Substack's open.substack.com redirect, so a row saved before
+    // cleanUrl started rewriting them would otherwise land at the top of the
+    // post forever. Cheap, and it repairs old rows on the way out.
+    val target = canonicalise(url)
+
     val passage = text.trim()
-    if (passage.isEmpty()) return url
+    if (passage.isEmpty()) return target
 
     if (fragmentTruncated) {
         val halves = passage.split(ELLIPSIS)
         if (halves.size == 2) {
-            return url + FRAGMENT_MARKER + "text=" +
+            return target + FRAGMENT_MARKER + "text=" +
                 encodeFragmentComponent(halves[0].trim()) + "," +
                 encodeFragmentComponent(halves[1].trim())
         }
         // The ellipsis is gone — most likely the passage was edited. Falling
         // back to the plain article beats linking to a phrase that isn't there.
-        return url
+        return target
     }
 
     val words = passage.split(WHITESPACE).filter { it.isNotEmpty() }
     if (words.size <= 12) {
-        return url + FRAGMENT_MARKER + "text=" + encodeFragmentComponent(passage)
+        return target + FRAGMENT_MARKER + "text=" + encodeFragmentComponent(passage)
     }
 
     val start = words.take(6).joinToString(" ")
     val end = words.takeLast(6).joinToString(" ")
-    return url + FRAGMENT_MARKER + "text=" +
+    return target + FRAGMENT_MARKER + "text=" +
         encodeFragmentComponent(start) + "," + encodeFragmentComponent(end)
 }
 

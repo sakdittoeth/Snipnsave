@@ -48,7 +48,7 @@ Room's annotation processor demonstrably ran — `app/schemas` holds the schema
 it generated on a real build.
 
 ```bash
-./gradlew test              # the 57 that are known to pass
+./gradlew test              # the 59 that are known to pass
 ./gradlew assembleDebug     # first real compile
 ```
 

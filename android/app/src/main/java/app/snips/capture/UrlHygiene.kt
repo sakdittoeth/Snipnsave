@@ -70,15 +70,18 @@ fun cleanUrl(raw: String?): String {
  * The Substack app shares posts as
  * `open.substack.com/pub/<publication>/p/<slug>`, an interstitial that
  * redirects to the publication. Three things go wrong if we keep it:
- * the publication reads as "Open", §5's `by-slug` endpoint is hosted on the
- * publication's origin rather than this one, and a text fragment has to
- * survive a redirect to land.
+ * the publication reads as "Open"; §5's `by-slug` endpoint is hosted on the
+ * publication's origin rather than this one; and — measured on a device, not
+ * assumed — **a text fragment does not survive the redirect**. The same
+ * fragment lands on the paragraph via `<pub>.substack.com/p/<slug>` and is
+ * silently dropped via `open.substack.com`, leaving the reader at the top of
+ * the post. That makes this rewrite load-bearing for "read in context".
  *
  * `<publication>.substack.com/p/<slug>` is the canonical form and works for
  * custom domains too — Substack redirects it to them. Anything that doesn't
  * match the shape is returned untouched.
  */
-private fun canonicalise(url: String): String {
+fun canonicalise(url: String): String {
     val match = OPEN_SUBSTACK.find(url) ?: return url
     val (publication, rest) = match.destructured
     return "https://$publication.substack.com/p/$rest"

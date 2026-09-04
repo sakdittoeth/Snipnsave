@@ -94,6 +94,24 @@ class TextFragmentTest {
     }
 
     @Test
+    fun `a link is always built on the canonical host, never the redirect`() {
+        // Measured on a device: a text fragment is dropped across
+        // open.substack.com's redirect and lands at the top of the post.
+        // Rows saved before cleanUrl canonicalised are repaired here.
+        val link = deepLink(
+            "https://open.substack.com/pub/savageminds/p/technofeudalism-and-the-future-of",
+            "a short passage",
+        )!!
+        assertTrue(link, link.startsWith("https://savageminds.substack.com/p/technofeudalism-and-the-future-of#:~:text="))
+    }
+
+    @Test
+    fun `a canonical url is left as it is`() {
+        val link = deepLink("https://pub.substack.com/p/x", "a short passage")!!
+        assertTrue(link, link.startsWith("https://pub.substack.com/p/x#"))
+    }
+
+    @Test
     fun `no url, no link`() {
         assertNull(deepLink("", "a passage"))
     }

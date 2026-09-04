@@ -115,12 +115,32 @@ discarded, which is what separates the two cases.
 The share's `utm_source`, `utm_medium` and `r` params were already on the
 prototype's JUNK list and are stripped.
 
-## Still unknown
+## Text fragments work — but only on the canonical URL
 
+Tested by hand, twice, because the first reading was wrong.
+
+| Opened in Chrome on Android | Result |
+|---|---|
+| `savageminds.substack.com/p/<slug>#:~:text=Technofeudalism` | lands on the paragraph and highlights it |
+| `open.substack.com/pub/savageminds/p/<slug>#:~:text=Technofeudalism` | **top of the page — fragment silently dropped** |
+
+So the fragment does not survive Substack's redirect. That turns the rewrite
+described above from a tidy-up into the thing "read in context" depends on:
+share a post from the Substack app, keep the URL it gives you, and every deep
+link you build from it will fail quietly, landing the reader at the headline
+with no error to explain it.
+
+`deepLink` therefore canonicalises again at link-building time rather than
+trusting the stored URL, which also repairs rows saved before `cleanUrl`
+started doing it.
+
+An earlier version of this file recorded the first test as a plain success.
+That was too strong: the URL opened then happened to be the canonical one,
+and the failure mode was invisible until the interstitial was tried directly.
+
+## Still unknown
 - What Substack's **Restack quote** puts on the clipboard, if anything.
 - Whether other readers — Feedly, Pocket, Reeder — expose `PROCESS_TEXT`.
-(Verified 2026-09-05: a text fragment on a canonical
-`<pub>.substack.com/p/<slug>` URL does scroll a Substack post to the passage
-and highlight it, in Chrome on Android. The deep-link half of the product
-works — step 4 is a matter of opening it in a Custom Tab rather than handing
-it to the Substack app, which cannot honour fragments.)
+- Whether a Custom Tab honours text fragments as reliably as Chrome proper
+  does. Step 4's first job, and the reason it opens in a Custom Tab rather
+  than a plain view intent, which may hand the link to the Substack app.
