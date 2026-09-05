@@ -41,7 +41,11 @@ class EnrichWorker(context: Context, params: WorkerParameters) :
             // A dead host, a redirect loop, a paywall that returns nothing —
             // all ordinary. Retry once or twice, then let it lie.
             return@withContext if (runAttemptCount < MAX_ATTEMPTS) Result.retry() else Result.success()
-        } ?: return@withContext Result.success()
+        }
+
+        // Nothing usable came back. Not a failure — §5 is explicit that a
+        // missing cover never costs the reader their snip.
+        if (metadata == null) return@withContext Result.success()
 
         // Anything already on the snip — a title the share handed us, a note —
         // stays. Enrichment fills gaps; it doesn't overwrite what we had.

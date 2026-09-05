@@ -42,7 +42,9 @@ class MetadataClient(private val http: OkHttpClient = defaultClient()) {
             // from being pulled into memory when we want five short strings.
             return response.body?.source()?.let { source ->
                 source.request(MAX_HTML_BYTES)
-                source.buffer.snapshot(minOf(source.buffer.size, MAX_HTML_BYTES)).utf8()
+                // snapshot() counts in Int; the cap keeps this well inside range.
+                val head = minOf(source.buffer.size, MAX_HTML_BYTES).toInt()
+                source.buffer.snapshot(head).utf8()
             }
         }
     }
