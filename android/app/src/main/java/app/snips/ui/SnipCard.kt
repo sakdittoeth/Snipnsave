@@ -22,10 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.snips.capture.fallbackPublication
+import coil.compose.AsyncImage
 import app.snips.data.Snip
 import app.snips.ui.theme.NoteStyle
 import app.snips.ui.theme.PassageStyle
@@ -56,9 +58,14 @@ fun SnipCard(
 
         // ---- attribution line ----
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Placeholder until the metadata worker fetches a real logo in step 5.
-            Box(
-                Modifier
+            // The hair-coloured circle is what shows before enrichment
+            // returns, and if it never does. Coil caches to disk, so a logo
+            // is fetched once rather than every time the row scrolls past.
+            AsyncImage(
+                model = snip.logoUrl.ifEmpty { null },
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
                     .size(16.dp)
                     .clip(CircleShape)
                     .background(colors.hair),
@@ -130,12 +137,15 @@ fun SnipCard(
                     )
                 }
             }
-            // The cover arrives with enrichment in step 5; until then the
-            // footer simply closes up rather than holding an empty box.
+            // No cover yet, or none at all: the footer closes up rather than
+            // holding an empty box open.
             if (snip.coverUrl.isNotEmpty()) {
                 Spacer(Modifier.width(12.dp))
-                Box(
-                    Modifier
+                AsyncImage(
+                    model = snip.coverUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
                         .size(52.dp)
                         .clip(RoundedCornerShape(2.dp))
                         .background(colors.tint),

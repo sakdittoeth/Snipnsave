@@ -150,7 +150,7 @@ Cards are separated by hairlines, not elevated surfaces. No Material cards, no s
 
 - **Sync.** Currently none, by design. If it's wanted later, the Room DAO is the only seam that changes.
 - **Editing a passage after saving.** Trimming a quote breaks the text fragment. Either keep the original for linking and show the edited version, or disallow edits.
-- **Non-Substack sites.** Nothing in the design is Substack-specific except the `by-slug` endpoint. Supporting any article is close to free — worth deciding before the metadata layer is written.
+- ~~**Non-Substack sites.**~~ **Decided: any article is supported.** The Open Graph parse in `data/ArticleMetadata.kt` is site-agnostic; `by-slug` is an optional seed for Substack posts only. Settled before the metadata layer was written, as this entry advised.
 - **Paywalled posts.** Links work when signed in on the device. Don't fetch or store article body text; only the passage the user selected.
 
 ## 9. Constraints

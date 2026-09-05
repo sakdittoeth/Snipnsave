@@ -64,15 +64,16 @@ class CaptureViewModel(private val dao: SnipDao) : ViewModel() {
 
     val canSave: Boolean get() = draft.text.isNotBlank() && !saving
 
-    /** @return true once the snip is in the database. */
-    suspend fun save(): Boolean {
-        if (!canSave) return false
+    /** @return the new snip's id once it is in the database, or null. */
+    suspend fun save(): String? {
+        if (!canSave) return null
         saving = true
 
         val url = cleanUrl(draft.url)
+        val id = UUID.randomUUID().toString()
         dao.insert(
             Snip(
-                id = UUID.randomUUID().toString(),
+                id = id,
                 text = draft.text.trim(),
                 url = url,
                 note = note.trim(),
@@ -83,7 +84,7 @@ class CaptureViewModel(private val dao: SnipDao) : ViewModel() {
                 fragmentTruncated = draft.fragmentTruncated,
             ),
         )
-        return true
+        return id
     }
 
     private companion object {

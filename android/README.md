@@ -27,7 +27,7 @@ Tracked against `HANDOVER.md` §7.
 | 2 | Room + capture sheet + save | **Done** |
 | 3 | Library list with the real card | **Done** — Spectral bundled |
 | 4 | Read in context via Custom Tabs | **Done** — untested on device |
-| 5 | Metadata enrichment worker | Not started |
+| 5 | Metadata enrichment worker | **Done** — any site, not just Substack |
 | 6 | Search, delete, undo | Not started |
 | 7 | JSON export/import | Not started |
 
@@ -48,7 +48,7 @@ Room's annotation processor demonstrably ran — `app/schemas` holds the schema
 it generated on a real build.
 
 ```bash
-./gradlew test              # the 59 that are known to pass
+./gradlew test              # the 70 that are known to pass
 ./gradlew assembleDebug     # first real compile
 ```
 
@@ -63,6 +63,9 @@ app/src/main/java/app/snips/
   ui/LibraryScreen.kt          The list and its empty state.
   ui/RelativeTime.kt           "3d ago", ported from the prototype.
   ui/ReadInContext.kt          Opens the deep link in a Custom Tab.
+  data/ArticleMetadata.kt      The Open Graph parse. Pure, and tested.
+  data/MetadataClient.kt       Fetches the page, and Substack's by-slug.
+  work/EnrichWorker.kt         Runs the fetch off the save path.
   ui/theme/                    §6 design tokens: Color, Type, Theme.
   res/font/                    Spectral, bundled as three static faces.
   assets/licenses/             The OFL licence — res/ only accepts font files.
@@ -70,9 +73,11 @@ app/src/main/java/app/snips/
 
 ## Notes on the scaffold
 
-- **Single module, no DI**, per §3. The version catalog declares Room,
-  OkHttp, Jsoup, Coil, WorkManager and Custom Tabs already, but `app/build.gradle.kts`
-  only wires what the current step needs — each gets added as its step lands.
+- **Single module, no DI**, per §3.
+- **Any article, not only Substack.** §8 left this open; it is now decided.
+  The Open Graph parse is generic, and the only Substack-specific path is the
+  optional `by-slug` seed, which §9 requires never to be load-bearing. A snip
+  from any site gets a publication, title, author, cover and logo.
 - **Material 3 is present but held at arm's length.** `SnipTheme.colors` carries the
   §6 tokens; the Material scheme is fed the same palette so dialogs and ripples
   don't drift. No dynamic colour — the app should look like Substack, not like

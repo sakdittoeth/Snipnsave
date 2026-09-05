@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import app.snips.R
 import app.snips.data.SnipDatabase
+import app.snips.work.EnrichWorker
 import app.snips.ui.theme.SnipTheme
 import kotlinx.coroutines.launch
 
@@ -67,7 +68,12 @@ class CaptureActivity : ComponentActivity() {
                     onCancel = { finish() },
                     onSave = {
                         scope.launch {
-                            if (viewModel.save()) {
+                            val id = viewModel.save()
+                            if (id != null) {
+                                // §5: the save is already done. The fetch happens
+                                // afterwards, on its own time, and the card fills
+                                // in when it returns.
+                                EnrichWorker.enqueue(this@CaptureActivity, id)
                                 Toast.makeText(this@CaptureActivity, R.string.snip_saved, Toast.LENGTH_SHORT).show()
                                 finish()
                             }
