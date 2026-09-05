@@ -41,8 +41,6 @@ fun SearchField(
 
     Row(
         modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 10.dp)
             .clip(RoundedCornerShape(4.dp))
             .background(colors.tint)
             .padding(start = 12.dp, end = 4.dp),

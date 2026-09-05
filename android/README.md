@@ -26,10 +26,10 @@ Tracked against `HANDOVER.md` §7.
 | 1 | Intent dump stub | **Done** — see `CAPTURE-FINDINGS.md` |
 | 2 | Room + capture sheet + save | **Done** |
 | 3 | Library list with the real card | **Done** — Spectral bundled |
-| 4 | Read in context via Custom Tabs | **Done** — untested on device |
+| 4 | Read in context via Custom Tabs | **Done** — verified on device |
 | 5 | Metadata enrichment worker | **Done** — any site, not just Substack |
 | 6 | Search, delete, undo | **Done** — untested on device |
-| 7 | JSON export/import | Not started |
+| 7 | JSON export/import | **Done** — untested on device |
 
 Step 1 is done, and it changed the design. `CAPTURE-FINDINGS.md` records what
 the intents actually contain — read it before touching capture, because it
@@ -48,7 +48,7 @@ Room's annotation processor demonstrably ran — `app/schemas` holds the schema
 it generated on a real build.
 
 ```bash
-./gradlew test              # the 70 that are known to pass
+./gradlew test              # the 82 that are known to pass
 ./gradlew assembleDebug     # first real compile
 ```
 
@@ -67,6 +67,8 @@ app/src/main/java/app/snips/
   ui/ReadInContext.kt          Opens the deep link in a Custom Tab.
   data/ArticleMetadata.kt      The Open Graph parse. Pure, and tested.
   data/MetadataClient.kt       Fetches the page, and Substack's by-slug.
+  data/SnipJson.kt             Export/import, in the prototype's field names.
+  ui/LibraryMenu.kt            Where export and import live.
   work/EnrichWorker.kt         Runs the fetch off the save path.
   ui/theme/                    §6 design tokens: Color, Type, Theme.
   res/font/                    Spectral, bundled as three static faces.

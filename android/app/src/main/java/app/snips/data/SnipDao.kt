@@ -43,6 +43,10 @@ interface SnipDao {
     @Query("SELECT * FROM snips WHERE id = :id")
     suspend fun byId(id: String): Snip?
 
+    /** A one-shot read of the whole library, for export. */
+    @Query("SELECT * FROM snips ORDER BY savedAt DESC")
+    suspend fun all(): List<Snip>
+
     /**
      * Recovery path 3 in §4b: PROCESS_TEXT hands over a passage with no URL,
      * so offer the article the last snip came from if it was saved moments ago.
@@ -52,6 +56,13 @@ interface SnipDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(snip: Snip)
+
+    /**
+     * REPLACE means importing the same file twice merges rather than
+     * duplicates: a row keeps its id, so it lands on top of itself.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(snips: List<Snip>)
 
     @Update
     suspend fun update(snip: Snip)

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,16 +30,37 @@ fun LibraryScreen(
     onRead: (Snip) -> Unit,
     onCopy: (Snip) -> Unit,
     onDelete: (Snip) -> Unit,
+    onExport: () -> Unit,
+    onImport: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxSize()) {
-        // The field stays put while a search is running, so clearing it is
-        // always within reach. It only disappears for a library with nothing
-        // in it at all, where there is nothing to search.
-        if (snips.isNotEmpty() || query.isNotEmpty()) {
-            SearchField(query = query, onQueryChange = onQueryChange, onClear = onClearQuery)
-            HorizontalDivider(color = SnipTheme.colors.hair)
+        // The header is always here, because import has to be reachable from
+        // an empty library — that is exactly when someone restores a backup.
+        // The search field within it is not: an empty library has nothing to
+        // search, so the wordmark stands in its place.
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (snips.isNotEmpty() || query.isNotEmpty()) {
+                SearchField(
+                    query = query,
+                    onQueryChange = onQueryChange,
+                    onClear = onClearQuery,
+                    modifier = Modifier.weight(1f),
+                )
+            } else {
+                Text(
+                    "Snips",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = SnipTheme.colors.ink,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            LibraryMenu(onExport = onExport, onImport = onImport)
         }
+        HorizontalDivider(color = SnipTheme.colors.hair)
 
         when {
             snips.isNotEmpty() -> LazyColumn(Modifier.fillMaxSize()) {
@@ -138,6 +160,8 @@ private fun LibraryPreview() {
             onRead = {},
             onCopy = {},
             onDelete = {},
+            onExport = {},
+            onImport = {},
         )
     }
 }

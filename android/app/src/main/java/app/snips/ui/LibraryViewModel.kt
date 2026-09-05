@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.snips.data.Snip
 import app.snips.data.SnipDao
+import app.snips.data.exportSnips
+import app.snips.data.importSnips
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -53,5 +55,23 @@ class LibraryViewModel(private val dao: SnipDao) : ViewModel() {
         val snip = lastDeleted ?: return
         lastDeleted = null
         viewModelScope.launch { dao.insert(snip) }
+    }
+
+    /** @return the file's contents, and how many snips are in it. */
+    suspend fun exportPayload(): Pair<String, Int> {
+        val all = dao.all()
+        return exportSnips(all) to all.size
+    }
+
+    /**
+     * @return how many snips the file yielded, or null if it wasn't readable
+     *   as a Snips export at all.
+     */
+    suspend fun import(json: String): Int? = try {
+        val snips = importSnips(json)
+        if (snips.isNotEmpty()) dao.insertAll(snips)
+        snips.size
+    } catch (_: Exception) {
+        null
     }
 }
