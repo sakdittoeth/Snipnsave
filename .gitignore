@@ -9,3 +9,9 @@ captures/
 *.apk
 *.aab
 .kotlin/
+
+# Signing material. The keystore and its passwords never belong in the repo:
+# losing control of them means someone else can ship an update as you.
+*.keystore
+*.jks
+keystore.properties

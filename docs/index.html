@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snips — a private highlight library</title>
+<meta name="description" content="Save a passage while you're reading, and get back to the exact sentence later. Android, no accounts, nothing leaves your phone.">
+
+<meta property="og:title" content="Snips">
+<meta property="og:description" content="A private highlight library for the things you read.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&display=swap">
+
+<style>
+  /* The app's own palette — HANDOVER.md §6. */
+  :root {
+    --paper: #FFFFFF;
+    --tint:  #FAF9F8;
+    --ink:   #1A1A1A;
+    --muted: #6B6B6B;
+    --hair:  #E7E5E4;
+    --mark:  #FF6719;
+    --serif: "Spectral", Georgia, "Times New Roman", serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #111110; --tint: #1C1B1A; --ink: #F0EFED;
+      --muted: #9A9793; --hair: #2E2C2A;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 620px; margin: 0 auto; padding: 64px 22px 96px; }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.1;
+    margin: 0;
+    letter-spacing: -0.015em;
+  }
+  .standfirst {
+    font-family: var(--serif);
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--muted);
+    margin: 14px 0 0;
+    max-width: 34ch;
+  }
+
+  /* The card, as the app draws it — the clearest possible answer to
+     "what does this thing actually do". */
+  figure.card {
+    margin: 40px 0 0;
+    padding: 20px 0;
+    border-top: 1px solid var(--hair);
+    border-bottom: 1px solid var(--hair);
+  }
+  .pub {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .pub .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--hair); }
+  .pub .when { margin-left: auto; }
+  .passage {
+    display: flex;
+    gap: 14px;
+    margin: 12px 0 0;
+  }
+  .passage .rule { width: 2px; background: var(--mark); flex: none; border-radius: 1px; }
+  .passage p {
+    font-family: var(--serif);
+    font-size: 18px;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .attrib { margin: 14px 0 0; font-size: 14px; }
+  .attrib .byline { color: var(--muted); font-size: 12px; }
+
+  .download { margin: 44px 0 0; }
+  .button {
+    display: inline-block;
+    background: var(--mark);
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 17px;
+    text-decoration: none;
+    padding: 15px 28px;
+    border-radius: 4px;
+  }
+  .button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .requires { font-size: 13.5px; color: var(--muted); margin: 12px 0 0; }
+
+  h2 {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 56px 0 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--hair);
+  }
+
+  ol.steps { margin: 18px 0 0; padding: 0; list-style: none; counter-reset: s; }
+  ol.steps li {
+    counter-increment: s;
+    position: relative;
+    padding: 0 0 0 34px;
+    margin: 0 0 16px;
+  }
+  ol.steps li::before {
+    content: counter(s);
+    position: absolute;
+    left: 0;
+    top: 1px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mark);
+  }
+  ol.steps b { font-weight: 600; }
+
+  .aside {
+    background: var(--tint);
+    border-left: 2px solid var(--hair);
+    padding: 12px 16px;
+    margin: 20px 0 0;
+    font-size: 14.5px;
+    color: var(--muted);
+  }
+  .aside b { color: var(--ink); }
+
+  p.body { margin: 16px 0 0; }
+  p.body.first { margin-top: 18px; }
+
+  footer {
+    margin: 64px 0 0;
+    padding-top: 22px;
+    border-top: 1px solid var(--hair);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  footer a { color: var(--muted); }
+  a { color: var(--ink); }
+
+  @media (max-width: 480px) {
+    .wrap { padding: 44px 18px 72px; }
+    h1 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Snips</h1>
+  <p class="standfirst">
+    Save a passage while you're reading, and get back to the exact sentence later.
+  </p>
+
+  <figure class="card">
+    <div class="pub">
+      <span class="dot"></span>
+      <span>Savage Minds</span>
+      <span class="when">Today</span>
+    </div>
+    <div class="passage">
+      <div class="rule"></div>
+      <p>Rentiers extract; capitalists invest. That distinction is doing all of the work in this argument, and almost none of the explaining.</p>
+    </div>
+    <div class="attrib">
+      Technofeudalism and the Future of Capitalism
+      <div class="byline">Yanis Varoufakis</div>
+    </div>
+  </figure>
+
+  <div class="download">
+    <a class="button" href="https://github.com/sakdittoeth/Snipnsave/releases/latest">Download for Android</a>
+    <p class="requires">Android 8.0 or newer · free · no account</p>
+  </div>
+
+  <h2>Installing it</h2>
+  <ol class="steps">
+    <li>Tap the download button above <b>on your phone</b>, and pick the <code>.apk</code> file on the release page.</li>
+    <li>Open the file once it has downloaded.</li>
+    <li>Android will ask whether to allow installing apps from this source. Allow it, then tap <b>Install</b>.</li>
+  </ol>
+
+  <div class="aside">
+    <b>That warning is normal.</b> Android shows it for anything that didn't come from
+    the Play Store. You're granting permission to whichever app opened the file —
+    usually Chrome or your file manager — not to Snips.
+  </div>
+
+  <h2>Saving your first passage</h2>
+  <p class="body first">
+    <b>Reading in a browser:</b> select the text, then <b>Share → Link to highlight →
+    Save snip</b>. The passage and a link straight back to it both come across.
+  </p>
+  <p class="body">
+    <b>Reading in the Substack app:</b> select the text and tap <b>Copy</b> — its menu
+    offers nothing else. Then open the post's share menu and choose <b>Save snip</b>.
+    Snips puts the two halves together.
+  </p>
+
+  <div class="aside">
+    <b>Open the post on its own page first.</b> A passage shared from a feed produces
+    a link to the feed rather than to the post, and "read in context" then has nowhere
+    to return to. Snips tells you when that happens, and saves the passage anyway.
+  </div>
+
+  <h2>Where your snips live</h2>
+  <p class="body first">
+    On your phone, and nowhere else. There are no accounts and no analytics, and the
+    only thing Snips sends over the network is a request for the title and cover of an
+    article you saved yourself. It never stores the article — only the passage you
+    chose.
+  </p>
+  <p class="body">
+    That does mean there's no sync and no backup, so there's an <b>Export</b> in the
+    menu that writes the whole library to a file you keep. Import reads it back.
+  </p>
+
+  <footer>
+    Open source —
+    <a href="https://github.com/sakdittoeth/Snipnsave">github.com/sakdittoeth/Snipnsave</a>
+  </footer>
+
+</div>
+</body>
+</html>

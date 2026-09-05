@@ -1,0 +1,101 @@
+# Cut a release by pushing a tag:
+#
+#   git tag v0.2 && git push origin v0.2
+#
+# The APK is built, signed and attached to a GitHub Release that anyone can
+# download — see android/DISTRIBUTING.md for the one-time keystore setup.
+name: Release APK
+
+on:
+  push:
+    tags:
+      - "v*"
+  # Also runnable by hand, for a build you don't want to tag yet.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # The tests that can run without a device. A release nobody has checked
+      # is worse than no release.
+      - name: Unit tests
+        working-directory: android
+        run: ./gradlew test --no-daemon
+
+      # The keystore is held as a base64 secret and only ever exists on disk
+      # inside this runner, which is destroyed when the job ends.
+      - name: Restore keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::KEYSTORE_BASE64 is not set — see android/DISTRIBUTING.md"
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+
+      - name: Work out the version
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          NAME="${TAG#v}"
+          # A monotonic versionCode, so Android always sees an upgrade.
+          echo "name=${NAME:-0.1}" >> "$GITHUB_OUTPUT"
+          echo "code=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+
+      - name: Build signed APK
+        working-directory: android
+        env:
+          SNIPS_STORE_FILE: ${{ runner.temp }}/release.keystore
+          SNIPS_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          SNIPS_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          SNIPS_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          ./gradlew assembleRelease --no-daemon \
+            -PsnipsVersionName="${{ steps.version.outputs.name }}" \
+            -PsnipsVersionCode="${{ steps.version.outputs.code }}"
+
+      - name: Name the file after its version
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/release/app-release.apk \
+             "out/snips-${{ steps.version.outputs.name }}.apk"
+
+      # Available even for a manual run that produced no release.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snips-apk
+          path: out/*.apk
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*.apk
+          generate_release_notes: true
+          body: |
+            **Snips ${{ steps.version.outputs.name }}** — a private highlight
+            library for the things you read.
+
+            Download the `.apk` below and open it on an Android phone
+            (Android 8.0 or newer). Your phone will ask whether to allow
+            installing from this source; that prompt is normal for any app
+            that doesn't come from the Play Store.
+
+            Nothing you save leaves your device. There are no accounts and no
+            analytics, and the only network requests are for article details
+            of links you saved yourself.

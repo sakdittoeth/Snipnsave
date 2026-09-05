@@ -49,7 +49,8 @@ it generated on a real build.
 
 ```bash
 ./gradlew test              # the 82 that are known to pass
-./gradlew assembleDebug     # first real compile
+./gradlew assembleDebug     # a build for your own phone
+./gradlew assembleRelease   # a signed build to share — see DISTRIBUTING.md
 ```
 
 ## Layout

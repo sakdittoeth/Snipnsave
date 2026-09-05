@@ -18,6 +18,14 @@ Read `HANDOVER.md`, then `web-prototype/README.md` and `web-prototype/index.html
 
 Build order and open decisions are in `HANDOVER.md` §7 and §8. Step 1 is a throwaway intent-dump stub; don't skip it, because what Substack's app and Chrome actually put in a share intent decides the shape of everything after it.
 
+## Installing it
+
+Releases are built and signed by `.github/workflows/release.yml` when a `v*`
+tag is pushed, and attached to a GitHub Release. `docs/index.html` is the page
+to send people — enable GitHub Pages from the `docs/` folder to serve it.
+Setup, and what to tell whoever you send it to, is in
+`android/DISTRIBUTING.md`.
+
 ## Trying the prototype
 
 Open `web-prototype/index.html` in a browser. Tap **+**, paste a passage and a Substack URL. Covers and author names need the metadata worker deployed — see `web-prototype/README.md`.
