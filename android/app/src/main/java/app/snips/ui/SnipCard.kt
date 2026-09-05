@@ -50,6 +50,7 @@ fun SnipCard(
     snip: Snip,
     onRead: () -> Unit,
     onCopy: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = SnipTheme.colors
@@ -156,9 +157,9 @@ fun SnipCard(
         Spacer(Modifier.height(6.dp))
 
         // ---- actions ----
-        // Delete arrives in step 6. "Read in context" is offered only when
-        // there is a link to follow — a snip saved without one is still worth
-        // keeping, but the action would do nothing.
+        // "Read in context" is offered only when there is a link to follow —
+        // a snip saved without one is still worth keeping, but the action
+        // would do nothing.
         Row {
             if (snip.url.isNotEmpty()) {
                 TextButton(onClick = onRead, contentPadding = ActionPadding) {
@@ -171,6 +172,11 @@ fun SnipCard(
             }
             TextButton(onClick = onCopy, contentPadding = ActionPadding) {
                 Text("Copy", style = MaterialTheme.typography.labelLarge, color = colors.muted)
+            }
+            // No confirmation dialog: undo is the gentler answer, and it
+            // doesn't interrupt anyone who meant it.
+            TextButton(onClick = onDelete, contentPadding = ActionPadding) {
+                Text("Delete", style = MaterialTheme.typography.labelLarge, color = colors.muted)
             }
         }
     }
@@ -195,6 +201,7 @@ private fun SnipCardPreview() {
             ),
             onRead = {},
             onCopy = {},
+            onDelete = {},
         )
     }
 }

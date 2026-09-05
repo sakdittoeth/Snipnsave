@@ -10,37 +10,69 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import app.snips.data.Snip
 import app.snips.data.SnipDatabase
 import app.snips.ui.LibraryScreen
+import app.snips.ui.LibraryViewModel
 import app.snips.ui.openInContext
 import app.snips.ui.theme.SnipTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: LibraryViewModel by lazy {
+        val dao = SnipDatabase.get(applicationContext).snips()
+        ViewModelProvider(
+            this,
+            viewModelFactory { initializer { LibraryViewModel(dao) } },
+        )[LibraryViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val snips = SnipDatabase.get(applicationContext).snips().observeAll()
-
         setContent {
-            val library by snips.collectAsStateWithLifecycle(initialValue = emptyList())
+            val library by viewModel.snips.collectAsStateWithLifecycle()
+            val snackbar = remember { SnackbarHostState() }
+            val scope = rememberCoroutineScope()
 
             SnipTheme {
                 // The Custom Tab's chrome takes the app's own paper tone, so
                 // stepping out to the article doesn't feel like leaving.
                 val toolbar = SnipTheme.colors.paper.toArgb()
 
-                Scaffold { insets ->
+                Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { insets ->
                     LibraryScreen(
                         snips = library,
+                        query = viewModel.query,
+                        onQueryChange = viewModel::onQueryChange,
+                        onClearQuery = viewModel::clearQuery,
                         onRead = { snip -> readInContext(snip, toolbar) },
                         onCopy = ::copyToClipboard,
+                        onDelete = { snip ->
+                            viewModel.delete(snip)
+                            scope.launch {
+                                // The row is already gone; this is the way back.
+                                val result = snackbar.showSnackbar(
+                                    message = getString(R.string.snip_deleted),
+                                    actionLabel = getString(R.string.undo),
+                                )
+                                if (result == SnackbarResult.ActionPerformed) viewModel.undoDelete()
+                            }
+                        },
                         modifier = Modifier.padding(insets),
                     )
                 }

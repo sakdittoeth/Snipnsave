@@ -18,6 +18,28 @@ interface SnipDao {
     @Query("SELECT * FROM snips ORDER BY savedAt DESC")
     fun observeAll(): Flow<List<Snip>>
 
+    /**
+     * The prototype searches the passage, title, publication and note as one
+     * blob, and so does this. An empty query returns everything, so the
+     * library needs only the one observer.
+     *
+     * SQLite's LIKE is case-insensitive for ASCII, which is the behaviour the
+     * prototype gets from lowercasing both sides.
+     */
+    @Query(
+        """
+        SELECT * FROM snips
+        WHERE :query = ''
+           OR text LIKE '%' || :query || '%'
+           OR title LIKE '%' || :query || '%'
+           OR publication LIKE '%' || :query || '%'
+           OR author LIKE '%' || :query || '%'
+           OR note LIKE '%' || :query || '%'
+        ORDER BY savedAt DESC
+        """,
+    )
+    fun search(query: String): Flow<List<Snip>>
+
     @Query("SELECT * FROM snips WHERE id = :id")
     suspend fun byId(id: String): Snip?
 

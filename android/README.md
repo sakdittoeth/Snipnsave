@@ -28,7 +28,7 @@ Tracked against `HANDOVER.md` §7.
 | 3 | Library list with the real card | **Done** — Spectral bundled |
 | 4 | Read in context via Custom Tabs | **Done** — untested on device |
 | 5 | Metadata enrichment worker | **Done** — any site, not just Substack |
-| 6 | Search, delete, undo | Not started |
+| 6 | Search, delete, undo | **Done** — untested on device |
 | 7 | JSON export/import | Not started |
 
 Step 1 is done, and it changed the design. `CAPTURE-FINDINGS.md` records what
@@ -60,7 +60,9 @@ app/src/main/java/app/snips/
   capture/                     The sheet, the parser, URL and fragment logic.
   (src/debug) IntentDumpActivity.kt  Step 1's dump. Test builds only.
   ui/SnipCard.kt               The card. §6's anatomy, passage as hero.
-  ui/LibraryScreen.kt          The list and its empty state.
+  ui/LibraryScreen.kt          The list, the search field, both empty states.
+  ui/LibraryViewModel.kt       Search query, delete, and the one-step undo.
+  ui/SearchField.kt            BasicTextField, so Material's chrome stays out.
   ui/RelativeTime.kt           "3d ago", ported from the prototype.
   ui/ReadInContext.kt          Opens the deep link in a Custom Tab.
   data/ArticleMetadata.kt      The Open Graph parse. Pure, and tested.

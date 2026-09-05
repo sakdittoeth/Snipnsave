@@ -5,4 +5,6 @@
     <string name="snip_saved">Snip saved</string>
     <string name="copied">Copied</string>
     <string name="no_browser">No browser available to open this</string>
+    <string name="snip_deleted">Snip deleted</string>
+    <string name="undo">Undo</string>
 </resources>

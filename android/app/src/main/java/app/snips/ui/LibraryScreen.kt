@@ -3,6 +3,7 @@ package app.snips.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,20 +23,38 @@ import app.snips.ui.theme.SnipTheme
 @Composable
 fun LibraryScreen(
     snips: List<Snip>,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onClearQuery: () -> Unit,
     onRead: (Snip) -> Unit,
     onCopy: (Snip) -> Unit,
+    onDelete: (Snip) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (snips.isEmpty()) {
-        EmptyLibrary(modifier)
-        return
-    }
-
-    LazyColumn(modifier.fillMaxSize()) {
-        items(snips, key = { it.id }) { snip ->
-            SnipCard(snip = snip, onRead = { onRead(snip) }, onCopy = { onCopy(snip) })
-            // Hairlines, not elevation — §6.
+    Column(modifier.fillMaxSize()) {
+        // The field stays put while a search is running, so clearing it is
+        // always within reach. It only disappears for a library with nothing
+        // in it at all, where there is nothing to search.
+        if (snips.isNotEmpty() || query.isNotEmpty()) {
+            SearchField(query = query, onQueryChange = onQueryChange, onClear = onClearQuery)
             HorizontalDivider(color = SnipTheme.colors.hair)
+        }
+
+        when {
+            snips.isNotEmpty() -> LazyColumn(Modifier.fillMaxSize()) {
+                items(snips, key = { it.id }) { snip ->
+                    SnipCard(
+                        snip = snip,
+                        onRead = { onRead(snip) },
+                        onCopy = { onCopy(snip) },
+                        onDelete = { onDelete(snip) },
+                    )
+                    // Hairlines, not elevation — §6.
+                    HorizontalDivider(color = SnipTheme.colors.hair)
+                }
+            }
+            query.isNotEmpty() -> NoMatches(query)
+            else -> EmptyLibrary()
         }
     }
 }
@@ -46,19 +65,37 @@ fun LibraryScreen(
  */
 @Composable
 private fun EmptyLibrary(modifier: Modifier = Modifier) {
+    Message(
+        headline = "Your first snip goes here.",
+        detail = "Select a passage while you're reading, then share it to Snips.",
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun NoMatches(query: String, modifier: Modifier = Modifier) {
+    Message(
+        headline = "Nothing matches “$query”.",
+        detail = "Search looks at the passage, the note, the title and who wrote it.",
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun Message(headline: String, detail: String, modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.fillMaxSize().padding(40.dp),
+        modifier = modifier.fillMaxSize().fillMaxWidth().padding(40.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            "Your first snip goes here.",
+            headline,
             style = PassageStyle,
             color = SnipTheme.colors.ink,
             textAlign = TextAlign.Center,
         )
         Text(
-            "Select a passage while you're reading, then share it to Snips.",
+            detail,
             style = MaterialTheme.typography.bodySmall,
             color = SnipTheme.colors.muted,
             textAlign = TextAlign.Center,
@@ -80,8 +117,9 @@ private fun LibraryPreview() {
                         "the work in this argument, and almost none of the explaining.",
                     url = "https://savageminds.substack.com/p/technofeudalism-and-the-future-of",
                     note = "Worth re-reading before the section on platform rents.",
-                    publication = "Savageminds",
+                    publication = "Savage Minds",
                     title = "Technofeudalism and the Future of Capitalism",
+                    author = "Cory Doctorow",
                     savedAt = now - 86_400_000L * 3,
                 ),
                 Snip(
@@ -94,8 +132,12 @@ private fun LibraryPreview() {
                     savedAt = now - 86_400_000L * 12,
                 ),
             ),
+            query = "",
+            onQueryChange = {},
+            onClearQuery = {},
             onRead = {},
             onCopy = {},
+            onDelete = {},
         )
     }
 }
@@ -104,4 +146,10 @@ private fun LibraryPreview() {
 @Composable
 private fun EmptyLibraryPreview() {
     SnipTheme { EmptyLibrary() }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NoMatchesPreview() {
+    SnipTheme { NoMatches("technofeudalism") }
 }
