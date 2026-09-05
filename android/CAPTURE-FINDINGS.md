@@ -141,7 +141,7 @@ and the failure mode was invisible until the interstitial was tried directly.
 ## Still unknown
 - What Substack's **Restack quote** puts on the clipboard, if anything.
 - Whether other readers — Feedly, Pocket, Reeder — expose `PROCESS_TEXT`.
-- Whether a Custom Tab honours text fragments as reliably as Chrome proper
-  does. Step 4 is built and pins the intent to a Custom Tabs browser — with
-  the `<queries>` block Android 11+ needs for that pinning to resolve at all —
-  but the behaviour itself is still unmeasured.
+(Answered 2026-09-05: a Custom Tab honours the fragment exactly as Chrome
+proper does — it lands on the paragraph and highlights it. The chain from a
+saved card back to the sentence is now verified end to end, on a device,
+with nothing assumed in the middle.)
