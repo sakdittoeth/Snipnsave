@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug builds only. The intent dump (HANDOVER §7 step 1) stays reachable
+  alongside the real capture sheet until the two real dumps — Substack app
+  and Chrome — have been read off a device; it never reaches a release build,
+  and the whole activity gets deleted once §4 is settled.
+
+  It appears in the share sheet as a second, clearly-labelled entry.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity
+            android:name=".capture.IntentDumpActivity"
+            android:exported="true"
+            android:label="@string/dump_label"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

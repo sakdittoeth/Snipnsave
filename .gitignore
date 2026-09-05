@@ -1,6 +1,17 @@
-android/build/
-android/.gradle/
-android/local.properties
+build/
+.gradle/
+local.properties
 .DS_Store
 *.iml
 .idea/
+.cxx/
+captures/
+*.apk
+*.aab
+.kotlin/
+
+# Signing material. The keystore and its passwords never belong in the repo:
+# losing control of them means someone else can ship an update as you.
+*.keystore
+*.jks
+keystore.properties
